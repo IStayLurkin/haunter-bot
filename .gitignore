@@ -1,0 +1,62 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+config.env
+.env
+.venv/
+env/
+venv/
+pip-log.txt
+*.log
+
+# Jupyter & notebooks
+.ipynb_checkpoints/
+
+# IDEs & tools
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS crap
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# GPT4All
+*.gguf
+*.bin
+*.model
+*.index
+nomic.ai/
+GPT4All/
+
+# Discord bot memory or cache
+bot_memory.json
+*.sqlite
+*.db
+
+# Node or other frontend tooling (if used)
+node_modules/
+*.lock
+.cache/
+
+# Logs and debug output
+logs/
+*.log
+*.bak
+
+# Backup files
+*.zip
+*.tar.gz
+*.tgz
+*.7z
+*.rar
