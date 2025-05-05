@@ -1,0 +1,76 @@
+{# templates/gpt4all.py.j2 #}
+"""GPT4All wrapper (specific template)
+
+Uses the local GPT4All library to generate text based on prompts.
+Requires the 'gpt4all' Python library and a downloaded model.
+"""
+
+import os
+from gpt4all import GPT4All
+import logging
+
+# Configure logging (optional, but helpful for debugging)
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+TOOL_NAME = "GPT4All"
+# Read model path from environment variable
+MODEL_PATH = os.getenv("GPT4ALL_MODEL_PATH")
+
+# Load the model once when the module is imported
+gpt4all_model = None
+if not MODEL_PATH:
+    logger.error("GPT4ALL_MODEL_PATH environment variable not set.")
+else:
+    try:
+        # Adjust model_path based on your GPT4All version/setup
+        # model = GPT4All(MODEL_PATH) is often sufficient
+        # Or if using default models directory:
+        # model = GPT4All(model_name='MODEL_FILENAME.gguf', allow_download=False)
+        # Let's assume MODEL_PATH is the full path to the file for simplicity here
+        gpt4all_model = GPT4All(MODEL_PATH)
+        logger.info(f"Successfully loaded GPT4All model from {MODEL_PATH}")
+    except Exception as e:
+        logger.error(f"Failed to load GPT4All model from {MODEL_PATH}: {e}")
+
+
+def run(arg: str) -> str:
+    """Generates text using the loaded GPT4All model based on the input prompt."""
+    if not gpt4all_model:
+        return f"[{TOOL_NAME}] Model not loaded. Please set GPT4ALL_MODEL_PATH correctly."
+
+    if not arg or not arg.strip():
+        return f"[{TOOL_NAME}] Please provide a prompt."
+
+    try:
+        logger.info(f"Generating text with prompt: {arg[:100]}...") # Log start of generation
+
+        # Use the generate method. Adjust parameters as needed (max_tokens, temp, etc.)
+        # The exact method signature might vary slightly based on gpt4all version
+        response = gpt4all_model.generate(
+            arg,
+            max_tokens=200, # Limit response length to avoid flooding Discord/context issues
+            temp=0.7
+            # Add other parameters like top_k, top_p, repeat_penalty if desired
+        )
+
+        logger.info(f"Generation complete. Response length: {len(response)}")
+
+        # Truncate the response if necessary (Discord message limit or your own limit)
+        MAX_RESPONSE_LENGTH = 1900 # Keep well below Discord's 2000 char limit
+        if len(response) > MAX_RESPONSE_LENGTH:
+             response = response[:MAX_RESPONSE_LENGTH] + "..." # Indicate truncation
+
+        return response.strip() or f"[{TOOL_NAME}] No response generated."
+
+    except Exception as e:
+        logger.error(f"Error during GPT4All generation: {e}")
+        return f"[{TOOL_NAME}] An error occurred during generation: {e}"
+
+# Example of how to use the tool (for testing purposes, won't run in bot)
+# if __name__ == "__main__":
+#     test_prompt = "What is the capital of France?"
+#     print(f"Running with prompt: '{test_prompt}'")
+#     result = run(test_prompt)
+#     print("Result:")
+#     print(result)

@@ -1,0 +1,17 @@
+"""Shodan host lookup"""
+
+import os
+import shodan
+
+API_KEY = os.getenv("SHODAN_API_KEY", "")
+
+def run(arg: str) -> str:
+    """Return Shodan host info as JSON."""
+    if not API_KEY:
+        return "[shodan] SHODAN_API_KEY not set"
+    client = shodan.Shodan(API_KEY)
+    try:
+        host = client.host(arg)
+        return str(host)
+    except shodan.APIError as e:
+        return f"[shodan] {e}"

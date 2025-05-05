@@ -1,0 +1,12 @@
+"""IPinfo integration"""
+import os
+import requests
+
+TOKEN = os.getenv("{{ api_key_var }}", "")
+
+def run(arg: str) -> str:
+    """Lookup IP details via IPinfo."""
+    url = f"https://ipinfo.io/{arg}/json"
+    headers = {"Authorization": f"Bearer {TOKEN}"} if TOKEN else {}
+    resp = requests.get(url, headers=headers, timeout=5)
+    return resp.text if resp.ok else f"IPinfo error: {resp.status_code}"

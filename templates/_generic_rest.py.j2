@@ -1,0 +1,29 @@
+{# templates/_generic_rest.py.j2 #}
+"""{{ name }} wrapper (generic REST)
+
+Calls: {{ url }}{{ '?' + query_param + '={arg}' if query_param else '/{arg}' }}
+Headers: {{ headers }}
+"""
+
+import json, requests
+
+URL          = "{{ url }}"
+QUERY_PARAM  = "{{ query_param }}"
+HEADERS      = {{ headers | tojson }}
+
+def run(arg: str) -> str:
+    """Query the REST endpoint for *arg* and return prettified JSON."""
+    if not arg:
+        return f"[{{ name }}] Empty argument."
+
+    # Build full URL (path vs query style)
+    full_url = f"{URL}/{arg}" if not QUERY_PARAM else f"{URL}?{QUERY_PARAM}={arg}"
+
+    try:
+        r = requests.get(full_url, headers=HEADERS, timeout=10)
+        r.raise_for_status()
+        # Truncate to 4 k chars for Discord
+        return json.dumps(r.json(), indent=2)[:4000]
+    except Exception as e:
+        return f"[{{ name }}] {e}"
+

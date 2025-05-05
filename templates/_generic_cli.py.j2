@@ -1,0 +1,29 @@
+{# templates/_generic_cli.py.j2 #}
+"""{{ name }} wrapper (generic CLI)
+
+Runs: {{ exec_name | replace('\\', '/') }} {{ arg_pattern }}
+Returns stdout (trimmed) or an error string.
+"""
+
+import subprocess, shlex
+
+CMD_TEMPLATE = "{{ cmd_builder | replace('\\', '/') }}"
+
+def run(arg: str) -> str:
+    if not arg:
+        return f"[{{ name }}] Empty argument."
+
+    try:
+        cmd = CMD_TEMPLATE.format(arg=arg)
+        out = subprocess.check_output(
+            shlex.split(cmd),
+            stderr=subprocess.STDOUT,
+            timeout=600  # 10‑minute ceiling for long scans
+        )
+        return out.decode()[:4000] or f"[{{ name }}] No output"
+    except subprocess.TimeoutExpired:
+        return f"[{{ name }}] Timed‑out (>10 min). Try a smaller scope."
+    except subprocess.CalledProcessError as e:
+        return f"[{{ name }}] {e.output.decode()}"
+    except Exception as e:
+        return f"[{{ name }}] {e}"

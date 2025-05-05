@@ -1,0 +1,18 @@
+"""Geopy geocode / reverse‑geocode
+
+If arg looks like 'lat,lon' → reverse‑geocode.
+Else → forward‑geocode the place string.
+"""
+import re
+from geopy.geocoders import Nominatim
+geolocator = Nominatim(user_agent="kiba_bot")
+LATLON = re.compile(r"^\\s*(-?\\d+(?:\\.\\d+)?),\\s*(-?\\d+(?:\\.\\d+)?)\\s*$")
+
+def run(arg: str) -> str:
+    match = LATLON.match(arg.strip())
+    if match:
+        lat, lon = map(float, match.groups())
+        loc = geolocator.reverse((lat, lon))
+    else:
+        loc = geolocator.geocode(arg)
+    return str(loc.raw if loc else "No result")

@@ -1,0 +1,36 @@
+# Configuration for the Offline LLM Bot
+
+llm:
+  # --- Select ONE LLM type and configure its section ---
+
+  # Option 1: llama-cpp-python (for GGUF models)
+  type: "llama_cpp"
+  # IMPORTANT: Update this path to your downloaded model file
+  model_path: "../models/Meta-Llama-3-8B-Instruct.Q4_0.gguf" # Relative path from src/utils.py to the model
+  n_gpu_layers: -1 # Number of layers to offload to GPU. -1 = try all, 0 = CPU only. Adjust based on your VRAM.
+  n_ctx: 4096      # Context window size (max tokens). Check your model's supported size.
+
+  # Option 2: Ollama (Requires Ollama server running)
+  # type: "ollama"
+  # host: "http://localhost:11434" # Default Ollama API endpoint
+  # model_name: "mistral:latest"     # Model name served by Ollama (e.g., mistral, llama3)
+
+memory:
+  type: "json" # Type of memory persistence ('json' or potentially 'sqlite' in future)
+  # Path to the memory file, relative to the project root directory
+  path: "../data/chat_history.json"
+
+tools:
+  enabled: true # Set to false to disable tool usage entirely
+
+discord:
+  enabled: false # Set to true to run the bot in Discord mode
+  # IMPORTANT: Get token from Discord Developer Portal.
+  # Use environment variable DISCORD_BOT_TOKEN if possible for security.
+  token: "DISCORD_TOKEN"
+  # Optional: List of channel IDs where the bot should be active.
+  # If empty or null, the bot will respond when mentioned in any channel it's in, or in DMs.
+  allowed_channel_ids:
+    # - "123456789012345678" # Example Channel ID 1 (as string)
+    # - "987654321098765432" # Example Channel ID 2 (as string)
+

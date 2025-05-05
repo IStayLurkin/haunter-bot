@@ -1,0 +1,18 @@
+your_offline_bot/
+├── config/
+│   └── config.yaml         # Configuration file
+├── models/                 # Directory to store your downloaded LLM models (e.g., GGUF files)
+├── data/
+│   └── chat_history.json   # Or chat_history.db for SQLite
+├── src/
+│   ├── __init__.py
+│   ├── llm_interface.py    # LLM abstraction and wrappers
+│   ├── memory.py           # Persistent memory handling
+│   ├── tools.py            # Tool registration and execution
+│   ├── prompt_manager.py   # (Optional) Helper for constructing prompts
+│   ├── cli_interface.py    # Command-line interaction logic
+│   ├── discord_bot.py      # Discord bot interaction logic
+│   └── utils.py            # Shared utility functions (e.g., config loading)
+├── requirements.txt        # Python dependencies
+├── main.py                 # Main entry point script
+└── README.md               # Instructions
