@@ -16,12 +16,24 @@ class LLMManager:
         self.model = None
         self.model_path = model_path
 
-        log.info(f"🧠 Loading GPT4All model from: {model_path}")
-        log.info(f"[LLMManager] Attempting to load GPT4All model from path: {self.model_path}")
+        # Step 1: Try hosted model (and download if missing)
+        log.info(f"[LLMManager] Trying hosted model '{model_path}' (allowing download)…")
         try:
-            self.model = GPT4All(self.model_path, allow_download=False)
+            # allow_download=True will fetch the .gguf into your cache if not present
+            self.model = GPT4All(model_path, allow_download=True)
+            log.info(f"[LLMManager] Loaded hosted model '{model_path}'")
+            return
         except Exception as e:
-            log.error(f"❌ Failed to load GPT4All model: {e}", exc_info=True)
+            log.error(f"[LLMManager] Hosted load failed: {e}", exc_info=True)
+
+        # Step 2: Fallback to your local .gguf file
+        local = r"F:/Projects/haun/models/Meta-Llama-3-8B-Instruct.Q4_0.gguf"
+        log.info(f"[LLMManager] Falling back to local file '{local}'…")
+        try:
+            self.model = GPT4All(local, allow_download=False)
+            log.info(f"[LLMManager] Loaded local model at '{local}'")
+        except Exception as e:
+            log.error(f"[LLMManager] Local load failed: {e}", exc_info=True)
             self.model = None
 
     def generate_text(self, prompt, **kwargs):
