@@ -1,10 +1,12 @@
+
 import logging
 from gpt4all import GPT4All
 from llama_local import query_llama_local  # fallback
 import os
 from utils.token_utils import truncate_to_token_limit
-from config.constants import CONTEXT_LIMIT  # shared config constant
+from config.constants import CONTEXT_LIMIT
 import concurrent.futures
+import traceback
 
 log = logging.getLogger("llm_manager")
 _llm_instance = None
@@ -14,7 +16,6 @@ class LLMManager:
         self.model = None
         self.model_path = model_path
 
-        # Log the final resolved path
         log.info(f"🧠 Loading GPT4All model from: {model_path}")
         log.info(f"[LLMManager] Attempting to load GPT4All model from path: {self.model_path}")
         try:
@@ -38,7 +39,7 @@ class LLMManager:
 
             with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
                 future = executor.submit(_generate)
-                result = future.result(timeout=15)  # ⏱ hard timeout
+                result = future.result(timeout=15)
                 log.debug(f"[Response] {result}")
                 return result.strip()
 
@@ -46,7 +47,6 @@ class LLMManager:
             log.error("🔥 GPT4All generation timed out after 15 seconds.")
             return "🔥 Timeout: " + query_llama_local(prompt)
         except Exception as e:
-            import traceback
             trace = traceback.format_exc()
             log.error(f"🔥 GPT4All generation error: {e}\n{trace}")
             return "🔥 Fallback: " + query_llama_local(prompt)
@@ -54,9 +54,6 @@ class LLMManager:
 def get_llm():
     global _llm_instance
     if _llm_instance is None:
-        model_path = os.getenv(
-            "GPT4ALL_MODEL_PATH",
-            "Meta-Llama-3-8B-Instruct"
-        )
+        model_path = os.getenv("GPT4ALL_MODEL_PATH", "Meta-Llama-3-8B-Instruct")
         _llm_instance = LLMManager(model_path)
     return _llm_instance

@@ -56,6 +56,16 @@ from tool_registry import TOOLS
 from utils.token_utils import truncate_to_token_limit
 from llama_local import query_llama_local
 
+# Force logging errors to stdout
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.DEBUG)
+formatter = logging.Formatter('[%(asctime)s] %(levelname)-8s %(name)s: %(message)s')
+handler.setFormatter(formatter)
+
+root_logger = logging.getLogger()
+root_logger.setLevel(logging.DEBUG)
+root_logger.addHandler(handler)
+
 # ---------------------------------------------------------------------------
 # Environment & constants
 # ---------------------------------------------------------------------------
