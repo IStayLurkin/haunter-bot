@@ -54,6 +54,8 @@ class LLMManager:
 def get_llm():
     global _llm_instance
     if _llm_instance is None:
-        model_path = os.getenv("GPT4ALL_MODEL_PATH", "Meta-Llama-3-8B-Instruct")
+        # Force using the hosted model name; ignore any ENV var
+        model_path = "Meta-Llama-3-8B-Instruct"
+        log.info(f"[LLMManager] Forcing model name (ignoring ENV): {model_path}")
         _llm_instance = LLMManager(model_path)
     return _llm_instance
