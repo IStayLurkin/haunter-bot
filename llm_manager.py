@@ -41,27 +41,38 @@ class LLMManager:
             log.warning("⚠️ LLM not loaded, falling back to llama_local")
             return "⚠️ Fallback: " + query_llama_local(prompt)
 
+        # set sensible defaults
+        max_tokens    = kwargs.pop("max_tokens", 512)
+        temperature   = kwargs.pop("temperature", 0.7)
+        stop_sequences= kwargs.pop("stop", None)
+
         try:
-            usable_tokens = CONTEXT_LIMIT - kwargs.get("max_tokens", 256)
+            usable_tokens = CONTEXT_LIMIT - max_tokens
             trimmed_prompt = truncate_to_token_limit(prompt, usable_tokens)
             log.debug(f"[Prompt] {trimmed_prompt}")
 
             def _generate():
-                return self.model.generate(trimmed_prompt, **kwargs)
+                # explicitly pass generation params
+                return self.model.generate(
+                    trimmed_prompt,
+                    max_tokens=max_tokens,
+                    temperature=temperature,
+                    stop=stop_sequences
+                )
 
             with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
                 future = executor.submit(_generate)
-                result = future.result(timeout=15)
-                log.debug(f"[Response] {result}")
+                result = future.result(timeout=60)  # give it a full minute
+                log.info(f"[Response] {result}")
                 return result.strip()
 
         except concurrent.futures.TimeoutError:
-            log.error("🔥 GPT4All generation timed out after 15 seconds.")
-            return "🔥 Timeout: " + query_llama_local(prompt)
+            log.error("🔥 GPT4All generation timed out after 60s.")
+            return "🔥 Timeout — falling back: " + query_llama_local(prompt)
         except Exception as e:
             trace = traceback.format_exc()
-            log.error(f"🔥 GPT4All generation error: {e}\n{trace}")
-            return "🔥 Fallback: " + query_llama_local(prompt)
+            log.error(f"🔥 Generation error: {e}\n{trace}")
+            return "🔥 Error — falling back: " + query_llama_local(prompt)
 
 def get_llm():
     global _llm_instance
